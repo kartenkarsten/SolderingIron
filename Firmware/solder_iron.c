@@ -6,33 +6,52 @@
  */ 
 
 #include <util/delay.h>
-//#include "includes/uart.h"
-#include <avr/eeprom.h>
+#include "includes/uart.h"
 #include "includes/display.h"
-#include "includes/adc.h"
-#include "includes/temperature.h"
+#include "includes/tip.h"
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include "config.h"
+#include "buttons.h"
 
+static int count = 0;
+void plus(void)
+{
+  if (count != TEMP_MAX) {
+  	count++;
+    
+  }
+}
 
-uint16_t last_temperature EEMEM = 350; //default
-int8_t temperature_offset EEMEM = -52; //default
+void minus(void)
+{
+  if (count != TEMP_MIN) {
+    count--;
+  }
+}
 
+void zero(void)
+{
+	count=0;
+}
+void one(void)
+{
+	count=1;
+}
 
 int main(void)
 {
+	uart_init(19200, one_stop_bit_e, no_parity_e);
+	buttons_init(&plus, &minus, &zero, &one);
+
 	display_init();
 
-	//display_digit(1,3);
+	sei();
+	printf_P(PSTR("\r\nMicLab Soldering Iron v0.1\r\n "));
 
 	_delay_ms(100);
 
 	while(1)
 	{
-		uint16_t value = measure_get_internal_temperature();
-		//uint16_t value = measure_get_internal_temperature();
-		display_number(value);
-		display_update();
-		_delay_us(200);
 	}
 }
